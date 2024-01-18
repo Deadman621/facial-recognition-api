@@ -1,3 +1,5 @@
+require('dotenv').config({ path: './variables.env' });
+
 const returnClarifairequestoptions = (imageUrl) => {
     const PAT = process.env.CLARIFAI_API_KEY;
     const USER_ID = process.env.CLARIFAI_USER_ID;       
@@ -40,12 +42,16 @@ const handleApiCall = (req, res) => {
     .catch(_err => res.status(400).json('Unable to work with API'));
 }
 
-const handleImage = (req, res, db) => {
+const handleImage = async (req, res, db) => {
     const { id } = req.body;
-    db('users').where('id', '=', id).increment('entries', 1)
-    .returning('entries')
-    .then(entries => res.json(entries[0].entries))
-    .catch(_err => res.status(400).json('Unable to get entries'));
+    try {
+        await db('users').where('id', '=', id).increment('entries', 1);
+        const users = await db.select('id', 'entries').from('users').orderBy('entries', 'desc');
+        const rank = users.findIndex(user => Number(user.id) === Number(id)) + 1;
+        res.json(rank);
+    } catch (err) {
+        res.status(400).json('Unable to get entries');
+    }
 }
 
 module.exports = {

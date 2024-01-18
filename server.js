@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const cors = require('cors');
 const knex = require('knex');
+require('dotenv').config();
 
 const register = require('./controllers/register');
 const profile = require('./controllers/profile');
